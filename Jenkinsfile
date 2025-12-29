@@ -13,7 +13,7 @@ pipeline {
         stage('Build Docker Image') {
             steps {
                 dir('src') {
-                    withDockerRegistry(credentialsId: 'docker-cred') {
+                    withDockerRegistry(credentialsId: 'docker-cred', url: 'https://index.docker.io/v1/') {
                         sh """
                         docker build -t ${REGISTRY}/${IMAGE_NAME}:${IMAGE_TAG} .
                         """
@@ -24,7 +24,7 @@ pipeline {
 
         stage('Push Docker Image') {
             steps {
-                withDockerRegistry(credentialsId: 'docker-cred') {
+                withDockerRegistry(credentialsId: 'docker-cred', url: 'https://index.docker.io/v1/') {
                     sh """
                     docker push ${REGISTRY}/${IMAGE_NAME}:${IMAGE_TAG}
                     """
