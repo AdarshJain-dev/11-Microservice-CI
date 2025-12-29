@@ -34,21 +34,30 @@ pipeline {
 
         stage('Update CD Repo Manifest (GitOps)') {
             steps {
-                withCredentials([gitUsernamePassword(credentialsId: 'git-cred', gitToolName: 'Default')]) {
+                withCredentials([
+                    gitUsernamePassword(
+                        credentialsId: 'git-cred',
+                        gitToolName: 'Default'
+                    )
+                ]) {
                     sh """
+                    rm -rf 11-Microservice-CD
                     git clone ${CD_REPO}
-                    cd OnlineBuitique-CD/cartservice
-
-                    sed -i 's|image: .*|image: ${REGISTRY}/${IMAGE_NAME}:${IMAGE_TAG}|' deployment.yaml
-
+        
+                    cd 11-Microservice-CD/shippingservice
+        
+                    sed -i 's|image:.*|image: ${REGISTRY}/${IMAGE_NAME}:${IMAGE_TAG}|' deployment-service.yaml
+        
                     git config user.name "Jenkins CI"
                     git config user.email "jenkins@ci.local"
-                    git add deployment.yaml
+        
+                    git add deployment-service.yaml
                     git commit -m "Update cartservice image to ${IMAGE_TAG}"
                     git push origin main
                     """
                 }
             }
         }
+
     }
 }
