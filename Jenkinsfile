@@ -5,7 +5,7 @@ pipeline {
         REGISTRY = "adarshjain428"
         IMAGE_NAME = "adservice"
         IMAGE_TAG = "${BUILD_NUMBER}"
-        CD_REPO = "https://github.com/AdarshJain-dev/OnlineBuitique-CD.git"
+        CD_REPO = "https://github.com/AdarshJain-dev/11-Microservice-CD.git"
     }
 
     stages {
@@ -13,7 +13,7 @@ pipeline {
         stage('Build Docker Image') {
             steps {
                 dir('src') {
-                    withDockerRegistry(credentialsId: 'docker-cred', toolName: 'docker') {
+                    withDockerRegistry(credentialsId: 'docker-cred') {
                         sh """
                         docker build -t ${REGISTRY}/${IMAGE_NAME}:${IMAGE_TAG} .
                         """
