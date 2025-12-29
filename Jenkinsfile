@@ -1,26 +1,52 @@
 pipeline {
     agent any
 
-    stages {
-        stage('Build & Tag Docker Image') {
-            steps {
-                script {
-                    dir('src') {
+    environment {
+        REGISTRY = "adarshjain428"
+        IMAGE_NAME = "cartservice"
+        IMAGE_TAG = "${BUILD_NUMBER}"
+        CD_REPO = "https://github.com/AdarshJain-dev/OnlineBuitique-CD.git"
+    }
 
+    stages {
+
+        stage('Build Docker Image') {
+            steps {
+                dir('src') {
                     withDockerRegistry(credentialsId: 'docker-cred', toolName: 'docker') {
-                        sh "docker build -t adarshjain428/cartservice:latest ."
+                        sh """
+                        docker build -t ${REGISTRY}/${IMAGE_NAME}:${IMAGE_TAG} .
+                        """
                     }
-                        }
                 }
             }
         }
-        
+
         stage('Push Docker Image') {
             steps {
-                script {
-                    withDockerRegistry(credentialsId: 'docker-cred', toolName: 'docker') {
-                        sh "docker push adarshjain428/cartservice:latest "
-                    }
+                withDockerRegistry(credentialsId: 'docker-cred', toolName: 'docker') {
+                    sh """
+                    docker push ${REGISTRY}/${IMAGE_NAME}:${IMAGE_TAG}
+                    """
+                }
+            }
+        }
+
+        stage('Update CD Repo Manifest (GitOps)') {
+            steps {
+                withCredentials([gitUsernamePassword(credentialsId: 'git-cred', gitToolName: 'Default')]) {
+                    sh """
+                    git clone ${CD_REPO}
+                    cd OnlineBuitique-CD/cartservice
+
+                    sed -i 's|image: .*|image: ${REGISTRY}/${IMAGE_NAME}:${IMAGE_TAG}|' deployment.yaml
+
+                    git config user.name "Jenkins CI"
+                    git config user.email "jenkins@ci.local"
+                    git add deployment.yaml
+                    git commit -m "Update cartservice image to ${IMAGE_TAG}"
+                    git push origin main
+                    """
                 }
             }
         }
