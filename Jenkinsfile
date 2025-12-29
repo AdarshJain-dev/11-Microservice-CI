@@ -24,7 +24,7 @@ pipeline {
 
         stage('Push Docker Image') {
             steps {
-                withDockerRegistry(credentialsId: 'docker-cred', toolName: 'docker') {
+                withDockerRegistry(credentialsId: 'docker-cred') {
                     sh """
                     docker push ${REGISTRY}/${IMAGE_NAME}:${IMAGE_TAG}
                     """
