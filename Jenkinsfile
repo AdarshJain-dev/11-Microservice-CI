@@ -12,7 +12,7 @@ pipeline {
 
         stage('Build Docker Image') {
             steps {
-                dir('src') {
+                script {
                     withDockerRegistry(credentialsId: 'docker-cred', url: 'https://index.docker.io/v1/') {
                         sh """
                         docker build -t ${REGISTRY}/${IMAGE_NAME}:${IMAGE_TAG} .
